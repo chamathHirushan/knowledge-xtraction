@@ -8,12 +8,12 @@ from extraction.candidate_llms import is_model_gemini, ask_gemini_model
 from extraction.pubmed import load_pubmedqa
 df = load_pubmedqa()
 
-candidate_llms = ["gemini-1.5-flash"] #TODO
-use_llm = "gemini-1.5-flash"        #TODO
+candidate_llms = ["gemini-2.5-flash"] #TODO
+use_llm = "gemini-2.5-flash"        #TODO
 
 edc_path = os.path.join(os.getcwd(), "./graph_construction")
 
-def run_edc_pipeline(row, llm_answer, llm="gemini-1.5-flash"):
+def run_edc_pipeline(row, llm_answer, llm="gemini-2.5-flash"):
     """
     Run EDC on long_answer, LLM answer, and context_clean of a row.
     `row` is expected to have attributes: long_answer, context_clean
