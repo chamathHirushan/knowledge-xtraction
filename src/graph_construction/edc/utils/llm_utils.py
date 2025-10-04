@@ -186,7 +186,7 @@ def gemini_chat_completion(
     system_prompt: str = None,
     history: list = None,
     temperature: float = 0.7,
-    max_tokens: int = 512,
+    max_tokens: int = 2048,
 ) -> str:
     from google import genai
     import time, logging
