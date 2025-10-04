@@ -16,6 +16,7 @@ def run_edc(
     args = {}
 
     if input_text or schema_llm or sc_embedder is None:
+        print("input_text, schema_llm, and sc_embedder are required parameters.", input_text, schema_llm, sc_embedder)
         return
     
     args["oie_llm"] = oie_llm
