@@ -58,7 +58,7 @@ for llm in candidate_llms:
             continue
 
         # Run pipeline
-        kg_gold, kg_llm, kg_context = build_graphs(row["gold"], row["context"], llm_answer=llm_answer)
+        kg_gold, kg_llm, kg_context = build_graphs(row["answer"], row["context"], llm_answer=llm_answer)
 
         # Create a DataFrame for this row
         df_row = pd.DataFrame([{
