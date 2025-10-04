@@ -28,41 +28,37 @@ class EDC:
     def __init__(self, **edc_configuration) -> None:
         # OIE module settings
         self.oie_llm_name = edc_configuration["oie_llm"]
-        self.oie_prompt_template_file_path = edc_configuration["oie_prompt_template_file_path"]
-        self.oie_few_shot_example_file_path = edc_configuration["oie_few_shot_example_file_path"]
+        self.oie_prompt_template_file_path = "./graph_construction/prompt_templates/oie_template.txt"
+        self.oie_few_shot_example_file_path = "./graph_construction/few_shot_examples/example/oie_few_shot_examples.txt"
 
         # Schema Definition module settings
-        self.sd_llm_name = edc_configuration["sd_llm"]
-        self.sd_template_file_path = edc_configuration["sd_prompt_template_file_path"]
-        self.sd_few_shot_example_file_path = edc_configuration["sd_few_shot_example_file_path"]
+        self.sd_llm_name = edc_configuration["schema_llm"]
+        self.sd_template_file_path = "./graph_construction/prompt_templates/sd_template.txt"
+        self.sd_few_shot_example_file_path = "./graph_construction/few_shot_examples/example/sd_few_shot_examples.txt"
 
         # Schema Canonicalization module settings
-        self.sc_llm_name = edc_configuration["sc_llm"]
+        self.sc_llm_name = edc_configuration["schema_llm"]
         self.sc_embedder_name = edc_configuration["sc_embedder"]
-        self.sc_template_file_path = edc_configuration["sc_prompt_template_file_path"]
+        self.sc_template_file_path = "./graph_construction/prompt_templates/sc_template.txt"
 
         # Refinement settings
         self.sr_adapter_path = edc_configuration["sr_adapter_path"]
 
         self.sr_embedder_name = edc_configuration["sr_embedder"]
-        self.oie_r_prompt_template_file_path = edc_configuration["oie_refine_prompt_template_file_path"]
-        self.oie_r_few_shot_example_file_path = edc_configuration["oie_refine_few_shot_example_file_path"]
+        self.oie_r_prompt_template_file_path = "./graph_construction/prompt_templates/oie_refine_template.txt"
+        self.oie_r_few_shot_example_file_path = "./graph_construction/few_shot_examples/example/oie_refine_few_shot_examples.txt"
 
-        self.ee_llm_name = edc_configuration["ee_llm"]
-        self.ee_template_file_path = edc_configuration["ee_prompt_template_file_path"]
-        self.ee_few_shot_example_file_path = edc_configuration["ee_few_shot_example_file_path"]
+        self.ee_llm_name = edc_configuration["schema_llm"]
+        self.ee_template_file_path = "./graph_construction/prompt_templates/ee_template.txt"
+        self.ee_few_shot_example_file_path = "./graph_construction/few_shot_examples/example/ee_few_shot_examples.txt"
 
-        self.em_template_file_path = edc_configuration["em_prompt_template_file_path"]
+        self.em_template_file_path = "./graph_construction/prompt_templates/em_template.txt"
 
-        self.initial_schema_path = edc_configuration["target_schema_path"]
+        self.initial_schema = edc_configuration["target_schema"]
         self.enrich_schema = edc_configuration["enrich_schema"]
 
-        if self.initial_schema_path is not None:
-            reader = csv.reader(open(self.initial_schema_path, "r"))
-            self.schema = {}
-            for row in reader:
-                relation, relation_definition = row
-                self.schema[relation] = relation_definition
+        if self.initial_schema is not None:
+            self.schema = self.initial_schema
         else:
             self.schema = {}
 
@@ -454,7 +450,7 @@ class EDC:
         for iteration in range(refinement_iterations + 1):
             logger.info(f"Iteration {iteration}:")
 
-            iteration_result_dir = f"{output_dir}/iter{iteration}"
+            #iteration_result_dir = f"{output_dir}/iter{iteration}"
 
             required_model_dict_current_iteration = copy.deepcopy(required_model_dict)
             print("input text list at the begining of iteration:", input_text_list)
@@ -523,31 +519,18 @@ class EDC:
             #     final_result_file.flush()
                 
             if iteration == refinement_iterations:
-                output_csv_path = f"./{output_dir}/schema_definitions.csv"
-                # Flatten schema_definition_dict_list into (relation, description) rows
-                all_rows = []
+                
+                all_rows = {}
                 for schema_def in sd_dict_list:
                     for relation, description in schema_def.items():
-                        all_rows.append({"relation": relation, "description": description})
-
-                df_new = pd.DataFrame(all_rows)
-                os.makedirs(os.path.dirname(output_csv_path), exist_ok=True)
-                if os.path.exists(output_csv_path):
-                    df_existing = pd.read_csv(output_csv_path)
-                    df_combined = pd.concat([df_existing, df_new], ignore_index=True)
-                    df_combined.drop_duplicates(inplace=True)
-                    df_combined.to_csv(output_csv_path, index=False)
-                    logger.info(f"Appended {len(df_new)} new rows to {output_csv_path}")
-                else:
-                    df_new.to_csv(output_csv_path, index=False)
-                    logger.info(f"Saved {len(df_new)} rows to new file {output_csv_path}")
+                        all_rows[relation] = description
                     
-                final_result_file = open(f"./{output_dir}/canon_kg.txt", "w")
-                for idx, canon_triplets in enumerate(non_null_triplets_list):
-                    final_result_file.write(str(canon_triplets))
-                    if idx != len(canon_triplets_list) - 1:
-                        final_result_file.write("\n")
-                    final_result_file.flush()
-                logger.info(f"EDC finished all {refinement_iterations} iterations.")
+                # final_result_file = open(f"./{output_dir}/canon_kg.txt", "w")
+                # for idx, canon_triplets in enumerate(non_null_triplets_list):
+                #     final_result_file.write(str(canon_triplets))
+                #     if idx != len(canon_triplets_list) - 1:
+                #         final_result_file.write("\n")
+                #     final_result_file.flush()
+                # logger.info(f"EDC finished all {refinement_iterations} iterations.")
 
-        return canon_triplets_list
+        return canon_triplets_list, all_rows
