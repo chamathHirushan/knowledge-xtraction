@@ -107,7 +107,7 @@ class SchemaCanonicalizer:
                 messages, self.verifier_model, self.verifier_tokenizer, answer_prepend="Answer: ", max_new_token=5
             )
 
-        if verification_result[0] in choice_letters_list:
+        if verification_result and verification_result[0] in choice_letters_list:
             canonicalized_triplet[1] = candidate_relations[choice_letters_list.index(verification_result[0])]
         else:
             return None
