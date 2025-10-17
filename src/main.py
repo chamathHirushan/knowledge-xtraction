@@ -81,7 +81,11 @@ for llm in candidate_llms:
         question = row["question"] + " " + row["context"]
         inputs = tokenizer(question, return_tensors="pt")
         
-        outputs = model.generate(**inputs)
+        outputs = model.generate(
+            **inputs,
+            max_new_tokens=256,  # or longer depending on expected answer
+            do_sample=False
+        )
         llm_answer = tokenizer.decode(outputs[0], skip_special_tokens=True)
         print("Answer:", llm_answer)
         # Build knowledge graphs
