@@ -1,13 +1,13 @@
 import os
 import pandas as pd
 from graph_construction.run import run_edc 
-from transformers import AutoTokenizer, AutoModelForCausalLM
-import torch
+# from transformers import AutoTokenizer, AutoModelForCausalLM
+# import torch
 from extraction.candidate_llms import is_model_gemini, ask_gemini_model
 from extraction.QA_datasets import load_mesaqa
 df = load_mesaqa()
 
-candidate_llms = ["mistralai/Mistral-7B-Instruct-v0.2"] #TODO
+candidate_llms = ["gemini-2.5-flash"] #TODO
 oit_llm = "mistralai/Mistral-7B-Instruct-v0.2"#"gemini-2.5-flash"        #TODO
 schema_llm = "mistralai/Mistral-7B-Instruct-v0.2"#"gemini-2.5-flash"     #TODO
 
@@ -65,29 +65,29 @@ for llm in candidate_llms:
 
     for idx, row in df.iterrows():
         # Get LLM answer
-        # if is_model_gemini(llm):
-        #     prompt = f"Question: {row['question']} Context: {row['context']}"
-        #     llm_answer = ask_gemini_model(prompt, model=llm)
-        #     print("LLM answer:", llm_answer)
-        # else:
-        #     print(f"LLM {llm} not supported yet, skipping...")
-        #     continue
+        if is_model_gemini(llm):
+            prompt = f"Question: {row['question']} Context: {row['context']}"
+            llm_answer = ask_gemini_model(prompt, model=llm)
+            print("LLM answer:", llm_answer)
+        else:
+            print(f"LLM {llm} not supported yet, skipping...")
+            continue
         
-        # Load a small model (example: Llama-3 or Mistral)
-        model_name = "intfloat/e5-mistral-7b-instruct"
-        tokenizer = AutoTokenizer.from_pretrained(model_name)
-        model = AutoModelForCausalLM.from_pretrained(model_name)
+        # # Load a small model (example: Llama-3 or Mistral)
+        # model_name = "intfloat/e5-mistral-7b-instruct"
+        # tokenizer = AutoTokenizer.from_pretrained(model_name)
+        # model = AutoModelForCausalLM.from_pretrained(model_name)
 
-        question = row["question"] + " " + row["context"]
-        inputs = tokenizer(question, return_tensors="pt")
+        # question = row["question"] + " " + row["context"]
+        # inputs = tokenizer(question, return_tensors="pt")
         
-        outputs = model.generate(
-            **inputs,
-            max_new_tokens=256,  # or longer depending on expected answer
-            do_sample=False
-        )
-        llm_answer = tokenizer.decode(outputs[0], skip_special_tokens=True)
-        print("Answer:", llm_answer)
+        # outputs = model.generate(
+        #     **inputs,
+        #     max_new_tokens=256,  # or longer depending on expected answer
+        #     do_sample=False
+        # )
+        # llm_answer = tokenizer.decode(outputs[0], skip_special_tokens=True)
+        # print("Answer:", llm_answer)
         # Build knowledge graphs
         kg_gold, kg_llm, kg_context = build_graphs(
             row["answer"], 
