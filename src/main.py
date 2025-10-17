@@ -12,7 +12,7 @@ schema_llm = "gemini-2.5-flash"     #TODO
 
 edc_path = os.path.join(os.getcwd(), "./graph_construction")
 
-def build_graphs(gold, context, llm_answer, oie_llm="gemini-2.5-flash", schema_llm="gemini-2.5-flash"):
+def build_graphs(gold, context, llm_answer, oie_llm=oit_llm, schema_llm=schema_llm):
     gold_kg, gold_def = run_edc(
         oie_llm=oie_llm,
         schema_llm=schema_llm,
@@ -48,10 +48,12 @@ for llm in candidate_llms:
     csv_file = os.path.join(output_path, f"{llm.replace('/', '_')}_kg_results.csv")
 
     for idx, row in df.iterrows():
+        if idx >= 3:# TODO
+            break
         llm_answer = ""
 
         if is_model_gemini(llm):
-            llm_answer = ask_gemini_model("Question: " + row["question"] + " Context: " + row["context"], model=llm)
+            llm_answer = ask_gemini_model(row["question"] + " " + row["context"], model=llm)
             print("LLM answer:", llm_answer)
         else:
             print(f"LLM {llm} not supported yet, skipping...")
@@ -63,10 +65,17 @@ for llm in candidate_llms:
         # Create a DataFrame for this row
         df_row = pd.DataFrame([{
             "row_id": idx,
+            "question": row["question"],
+            "gold_answer": row["answer"],
             "kg_gold": str(kg_gold),
+            "llm_answer": llm_answer,
             "kg_llm": str(kg_llm),
+            "context": row["context"],
             "kg_context": str(kg_context)
-        }])
+        }], columns=[
+            "row_id", "question", "gold_answer", "kg_gold", 
+            "llm_answer", "kg_llm", "context", "kg_context"
+        ])
 
         # Append to CSV dynamically
         if os.path.exists(csv_file):
