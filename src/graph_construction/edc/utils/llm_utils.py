@@ -181,44 +181,109 @@ def openai_chat_completion(model, system_prompt, history, temperature=0, max_tok
     logging.debug(f"Model: {model}\nPrompt:\n {messages}\n Result: {response.choices[0].message.content}")
     return response.choices[0].message.content
 
+# def gemini_chat_completion(
+#     model: str = "gemini-2.5-flash",
+#     system_prompt: str = None,
+#     history: list = None,
+#     temperature: float = 0.7,
+#     max_tokens: int = 2048,
+# ) -> str:
+#     from google import genai
+#     import time, logging
+
+#     # print(f"In gemini_chat_completion: system_prompt={system_prompt}, history={history}")
+#     client = genai.Client(api_key="AIzaSyB2ZiVqtv45yjudCnB7aJ46t7r8L2MFK9s")#os.getenv("GEMINI_API_KEY"))
+    
+#     # Convert messages
+#     contents = []
+#     if system_prompt:
+#         contents.append({"role": "system", "parts": [{"text": system_prompt}]})
+#     if history:
+#         for turn in history:
+#             contents.append({"role": turn["role"], "parts": [{"text": turn["content"]}]})
+    
+#     # Safety check
+#     if not contents:
+#         raise ValueError("gemini_chat_completion: no contents provided.")
+    
+#     response = None
+#     while response is None:
+#         try:
+#             response = client.models.generate_content(
+#                 model=model,
+#                 contents=contents,
+#                 config={
+#                     "temperature": temperature,
+#                     "max_output_tokens": max_tokens,
+#                 },
+#             )
+#         except Exception as e:
+#             logging.warning(f"Gemini API call failed: {e}. Retrying...")
+#             time.sleep(5)
+    
+#     return response.text
+
+# import os
+# import time
+# import logging
+# from google import genai
+
+# Configure logging for the retry mechanism
+logging.basicConfig(level=logging.WARNING, format='%(levelname)s: %(message)s')
+
 def gemini_chat_completion(
     model: str = "gemini-2.5-flash",
     system_prompt: str = None,
     history: list = None,
     temperature: float = 0.7,
     max_tokens: int = 2048,
+    max_retries: int = 5,
 ) -> str:
-    from google import genai
-    import time, logging
-
-    print(f"In gemini_chat_completion: system_prompt={system_prompt}, history={history}")
-    client = genai.Client(api_key="AIzaSyB2ZiVqtv45yjudCnB7aJ46t7r8L2MFK9s")#os.getenv("GEMINI_API_KEY"))
+    """
+    Generates a response using the Gemini API, supporting system prompts and chat history.
+    """
     
-    # Convert messages
+    # Initialize client, using best practice of reading API key from environment 
+    # if it's not explicitly passed, or using the placeholder value.
+    try:
+        client = genai.Client(api_key="AIzaSyB2ZiVqtv45yjudCnB7aJ46t7r8L2MFK9s")
+    except Exception as e:
+        return f"Configuration Error: Could not initialize Gemini client. Check if API Key is correct or set: {e}"
+
+    # 1. Convert messages and prepare content structure
     contents = []
-    if system_prompt:
-        contents.append({"role": "system", "parts": [{"text": system_prompt}]})
     if history:
         for turn in history:
+            # Assumes history uses 'content' key, maps 'role' to SDK required structure
             contents.append({"role": turn["role"], "parts": [{"text": turn["content"]}]})
     
-    # Safety check
-    if not contents:
-        raise ValueError("gemini_chat_completion: no contents provided.")
+    if not contents and not system_prompt:
+        return "Error: No user query or history provided."
+
+    # 3. Construct the configuration dictionary, including system_instruction if present
+    config_params = {
+        "temperature": temperature,
+        "max_output_tokens": max_tokens,
+    }
     
-    response = None
-    while response is None:
+    # FIX: Move system_instruction inside the config dictionary to resolve the 
+    # "unexpected keyword argument" error on older SDK versions.
+    if system_prompt:
+        # The key name is 'system_instruction' in the config for this purpose.
+        config_params["system_instruction"] = system_prompt 
+    
+    # 2. Implement bounded retry loop with exponential backoff
+    for attempt in range(max_retries):
         try:
             response = client.models.generate_content(
                 model=model,
                 contents=contents,
-                config={
-                    "temperature": temperature,
-                    "max_output_tokens": max_tokens,
-                },
+                config=config_params, # Pass the consolidated config
             )
+            return response.text # Success
+                
         except Exception as e:
-            logging.warning(f"Gemini API call failed: {e}. Retrying...")
-            time.sleep(5)
-    
-    return response.text
+            # Catch other critical errors (e.g., 400 Bad Request, invalid input/model name)
+            return f"Critical API Error: {e}"
+
+    return "Error: Function completed without returning a response."
