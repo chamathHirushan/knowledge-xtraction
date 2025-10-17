@@ -542,3 +542,19 @@ class EDC:
                 # logger.info(f"EDC finished all {refinement_iterations} iterations.")
 
         return canon_triplets_list, all_rows
+
+    def get_llm_answer(self, model, tokenizer, question, max_new_tokens=256):
+        inputs = tokenizer(question, return_tensors="pt").to("cuda")
+        
+        with torch.no_grad():
+            output_ids = model.generate(
+                **inputs,
+                max_new_tokens=max_new_tokens,
+                do_sample=True,          # optional: for varied outputs
+                temperature=0.7,         # optional: controls creativity
+                top_p=0.9,               # optional: nucleus sampling
+            )
+
+        answer = tokenizer.decode(output_ids[0], skip_special_tokens=True)
+        
+        return answer

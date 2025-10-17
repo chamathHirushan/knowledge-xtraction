@@ -1,42 +1,38 @@
 import os
 import pandas as pd
-from graph_construction.run import run_edc 
+from graph_construction.run import run_edc , load_edc
 
 from extraction.candidate_llms import is_model_gemini, ask_gemini_model
 from extraction.QA_datasets import load_mesaqa
 df = load_mesaqa()
 
 candidate_llms = ["gemini-2.5-flash"] #TODO
-oit_llm = "mistralai/Mistral-7B-Instruct-v0.2"        #TODO
+oie_llm = "mistralai/Mistral-7B-Instruct-v0.2"        #TODO
 schema_llm = "mistralai/Mistral-7B-Instruct-v0.2"     #TODO
-sc_embedder="intfloat/e5-mistral-7b-instruct"#"all-mpnet-base-v2" #TODO #intfloat/e5-mistral-7b-instruct
+sc_embedder="all-mpnet-base-v2" #TODO #intfloat/e5-mistral-7b-instruct
+
+edc = load_edc(oie_llm=oie_llm,
+        schema_llm=schema_llm,
+        sc_embedder=sc_embedder)
 
 edc_path = os.path.join(os.getcwd(), "./graph_construction")
 
-def build_graphs(gold, context, llm_answer, oie_llm=oit_llm, schema_llm=schema_llm):
+def build_graphs(gold, context, llm_answer, edc=edc):
     gold_kg, gold_def = run_edc(
-        oie_llm=oie_llm,
-        schema_llm=schema_llm,
-        sc_embedder=sc_embedder,
+        edc,
         input_text=[gold]
     )
     llm_kg, llm_def = run_edc(
-        oie_llm=oie_llm,
-        schema_llm=schema_llm,
-        sc_embedder=sc_embedder,
-        input_text=[llm_answer],
-        target_schema=gold_def
+        edc,
+        input_text=[llm_answer]
+
     )
     context_kg, context_def = run_edc(
-        oie_llm=oie_llm,
-        schema_llm=schema_llm,
-        sc_embedder=sc_embedder,
+        edc,
         input_text=[context],
         target_schema=llm_def
     )
     return gold_kg, llm_kg, context_kg
-
-################################
 
 for llm in candidate_llms:
     print(f"Processing all rows with LLM {llm}...")
@@ -49,7 +45,7 @@ for llm in candidate_llms:
     csv_file = os.path.join(output_path, f"{llm.replace('/', '_')}_kg_results.csv")
 
     for idx, row in df.iterrows():
-        if idx >= 3:# TODO
+        if idx >= 100:# TODO
             break
         llm_answer = ""
 
@@ -57,8 +53,8 @@ for llm in candidate_llms:
             llm_answer = ask_gemini_model(row["question"] + " " + row["context"], model=llm)
             print("LLM answer:", llm_answer)
         else:
-            print(f"LLM {llm} not supported yet, skipping...")
-            continue
+            model, tokenizer = edc.load_model("mistralai/Mistral-7B-Instruct-v0.2", "hf")
+            llm_answer = edc.get_llm_answer(model, tokenizer, row["question"] + " " + row["context"])
 
         # Run pipeline
         kg_gold, kg_llm, kg_context = build_graphs(row["answer"], row["context"], llm_answer=llm_answer)
