@@ -29,8 +29,7 @@ def build_graphs(gold, context, llm_answer, edc=edc):
     )
     context_kg, context_def = run_edc(
         edc,
-        input_text=[context],
-        target_schema=llm_def
+        input_text=[context]
     )
     return gold_kg, llm_kg, context_kg
 
