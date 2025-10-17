@@ -34,8 +34,8 @@ def run_edc(
     output_dir=None,
     refinement_iterations=0,
 ):
-    if edc is None or input_text is None or output_dir is None:
-        print("edc, input_text, and output_dir are required parameters.", edc, input_text, output_dir)
+    if edc is None or input_text is None:
+        print("edc, input_text are required parameters.", edc, input_text)
         return
     
     output_kg, definitions = edc.extract_kg(
