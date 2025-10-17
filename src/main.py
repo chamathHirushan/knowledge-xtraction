@@ -25,14 +25,14 @@ def build_graphs(gold, context, llm_answer, oie_llm=oit_llm, schema_llm=schema_l
         schema_llm=schema_llm,
         sc_embedder=sc_embedder,
         input_text=[llm_answer],
-        #target_schema=gold_def
+        target_schema=gold_def
     )
     context_kg, context_def = run_edc(
         oie_llm=oie_llm,
         schema_llm=schema_llm,
         sc_embedder=sc_embedder,
         input_text=[context],
-        #target_schema=llm_def
+        target_schema=llm_def
     )
     return gold_kg, llm_kg, context_kg
 

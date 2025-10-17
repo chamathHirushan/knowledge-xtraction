@@ -10,7 +10,7 @@ def run_edc(
     target_schema=None,
     output_dir=None,
     refinement_iterations=0,
-    enrich_schema=False,
+    enrich_schema=True,
     loglevel=True
 ):
     args = {}
