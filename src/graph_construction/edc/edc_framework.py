@@ -153,13 +153,15 @@ class EDC:
         else:
             logger.info(f"Loading model {model_name}")
             if model_type == "hf":
-                model, tokenizer = (
-                    AutoModelForCausalLM.from_pretrained(model_name, device_map="auto"),
-                    AutoTokenizer.from_pretrained(model_name),
+                tokenizer = AutoTokenizer.from_pretrained(model_name)
+                model = AutoModelForCausalLM.from_pretrained(
+                    model_name,
+                    device_map="auto",   # automatically spread layers across available GPU(s)
+                    load_in_8bit=True,   # reduce memory footprint drastically
                 )
                 self.loaded_model_dict[model_name] = (model, tokenizer)
             elif model_type == "sts":
-                model = SentenceTransformer(model_name, trust_remote_code=True)
+                model = SentenceTransformer(model_name, trust_remote_code=True, device="cpu")
                 self.loaded_model_dict[model_name] = model
         return self.loaded_model_dict[model_name]
 
