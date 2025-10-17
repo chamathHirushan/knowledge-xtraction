@@ -248,7 +248,8 @@ def gemini_chat_completion(
     try:
         client = genai.Client(api_key="AIzaSyB2ZiVqtv45yjudCnB7aJ46t7r8L2MFK9s")
     except Exception as e:
-        return f"Configuration Error: Could not initialize Gemini client. Check if API Key is correct or set: {e}"
+        print(f"Configuration Error: Could not initialize Gemini client. Check if API Key is correct or set: {e}")
+        return None
 
     # 1. Convert messages and prepare content structure
     contents = []
@@ -258,7 +259,8 @@ def gemini_chat_completion(
             contents.append({"role": turn["role"], "parts": [{"text": turn["content"]}]})
     
     if not contents and not system_prompt:
-        return "Error: No user query or history provided."
+        print("Error: No user query or history provided.")
+        return None
 
     # 3. Construct the configuration dictionary, including system_instruction if present
     config_params = {
@@ -284,6 +286,8 @@ def gemini_chat_completion(
                 
         except Exception as e:
             # Catch other critical errors (e.g., 400 Bad Request, invalid input/model name)
-            return f"Critical API Error: {e}"
+            print(f"Critical API Error: {e}")
+            return None
 
-    return "Error: Function completed without returning a response."
+    print("Error: Function completed without returning a response.")
+    return None
