@@ -13,7 +13,7 @@ schema_llm = "mistralai/Mistral-7B-Instruct-v0.2"#"gemini-2.5-flash"     #TODO
 
 edc_path = os.path.join(os.getcwd(), "./graph_construction")
 
-def build_graphs(gold, context, llm_answer, oie_llm="gemini-2.5-flash", schema_llm="gemini-2.5-flash"):
+def build_graphs(gold, context, llm_answer, oie_llm=oit_llm, schema_llm=schema_llm):
     gold_kg, gold_def = run_edc(
         oie_llm=oie_llm,
         schema_llm=schema_llm,
