@@ -55,6 +55,7 @@ for llm in candidate_llms:
         else:
             model, tokenizer = edc.load_model("mistralai/Mistral-7B-Instruct-v0.2", "hf")
             llm_answer = edc.get_llm_answer(model, tokenizer, row["question"] + " " + row["context"])
+            print("LLM answer:", llm_answer)
 
         # Run pipeline
         kg_gold, kg_llm, kg_context = build_graphs(row["answer"], row["context"], llm_answer=llm_answer)
