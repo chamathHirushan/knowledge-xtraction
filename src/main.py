@@ -9,7 +9,7 @@ df = load_mesaqa()
 candidate_llms = ["gemini-2.5-flash"] #TODO
 oit_llm = "mistralai/Mistral-7B-Instruct-v0.2"        #TODO
 schema_llm = "mistralai/Mistral-7B-Instruct-v0.2"     #TODO
-sc_embedder="all-mpnet-base-v2" #TODO #intfloat/e5-mistral-7b-instruct
+sc_embedder="intfloat/e5-mistral-7b-instruct"#"all-mpnet-base-v2" #TODO #intfloat/e5-mistral-7b-instruct
 
 edc_path = os.path.join(os.getcwd(), "./graph_construction")
 
@@ -25,14 +25,14 @@ def build_graphs(gold, context, llm_answer, oie_llm=oit_llm, schema_llm=schema_l
         schema_llm=schema_llm,
         sc_embedder=sc_embedder,
         input_text=[llm_answer],
-        target_schema=gold_def
+        #target_schema=gold_def
     )
     context_kg, context_def = run_edc(
         oie_llm=oie_llm,
         schema_llm=schema_llm,
         sc_embedder=sc_embedder,
         input_text=[context],
-        target_schema=llm_def
+        #target_schema=llm_def
     )
     return gold_kg, llm_kg, context_kg
 
