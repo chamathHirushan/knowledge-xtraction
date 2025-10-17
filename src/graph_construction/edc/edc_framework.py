@@ -543,7 +543,7 @@ class EDC:
 
         return canon_triplets_list, all_rows
 
-    def get_llm_answer(self, model, tokenizer, question, max_new_tokens=256):
+    def get_llm_answer(self, model, tokenizer, question, max_new_tokens=128):
         inputs = tokenizer(question, return_tensors="pt").to("cuda")
         
         with torch.no_grad():
