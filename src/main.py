@@ -6,7 +6,7 @@ from extraction.candidate_llms import is_model_gemini, ask_gemini_model
 from extraction.QA_datasets import load_mesaqa
 df = load_mesaqa()
 
-candidate_llms = ["gemini-2.5-flash"] #TODO
+candidate_llms = ["mistralai/Mistral-7B-Instruct-v0.2"] #TODO
 oie_llm = "mistralai/Mistral-7B-Instruct-v0.2"        #TODO
 schema_llm = "mistralai/Mistral-7B-Instruct-v0.2"     #TODO
 sc_embedder="all-mpnet-base-v2" #TODO #intfloat/e5-mistral-7b-instruct
