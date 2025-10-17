@@ -49,7 +49,7 @@ for llm in candidate_llms:
     csv_file = os.path.join(output_path, f"{llm.replace('/', '_')}_kg_results.csv")
 
     for idx, row in df.iterrows():
-        if idx >= 3:# TODO
+        if idx >= 100:# TODO
             break
         llm_answer = ""
 
