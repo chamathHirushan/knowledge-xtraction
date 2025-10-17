@@ -19,6 +19,7 @@ from sentence_transformers import SentenceTransformer
 from importlib import reload
 import random
 import json
+import torch
 
 reload(logging)
 logger = logging.getLogger(__name__)
@@ -153,10 +154,17 @@ class EDC:
         else:
             logger.info(f"Loading model {model_name}")
             if model_type == "hf":
-                model, tokenizer = (
-                    AutoModelForCausalLM.from_pretrained(model_name, device_map="auto"),
-                    AutoTokenizer.from_pretrained(model_name),
+                tokenizer = AutoTokenizer.from_pretrained(model_name)
+                model = AutoModelForCausalLM.from_pretrained(
+                    model_name,
+                    device_map="auto",
+                    torch_dtype=torch.float16,
                 )
+
+                # model, tokenizer = ( #CHG
+                #     AutoModelForCausalLM.from_pretrained(model_name, device_map="auto"),
+                #     AutoTokenizer.from_pretrained(model_name),
+                # )
                 self.loaded_model_dict[model_name] = (model, tokenizer)
             elif model_type == "sts":
                 model = SentenceTransformer(model_name, trust_remote_code=True)
