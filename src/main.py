@@ -7,7 +7,7 @@ from extraction.candidate_llms import is_model_gemini, ask_gemini_model
 from extraction.QA_datasets import load_mesaqa
 df = load_mesaqa()
 
-candidate_llms = ["gemini-2.5-flash"] #TODO
+candidate_llms = ["gemini-1.5-flash"] #TODO
 oit_llm = "mistralai/Mistral-7B-Instruct-v0.2"#"gemini-2.5-flash"        #TODO
 schema_llm = "mistralai/Mistral-7B-Instruct-v0.2"#"gemini-2.5-flash"     #TODO
 
@@ -66,7 +66,7 @@ for llm in candidate_llms:
     for idx, row in df.iterrows():
         # Get LLM answer
         if is_model_gemini(llm):
-            prompt = f"Question: {row['question']} Context: {row['context']}"
+            prompt = f"{row['question']} {row['context']}"
             llm_answer = ask_gemini_model(prompt, model=llm)
             print("LLM answer:", llm_answer)
         else:
