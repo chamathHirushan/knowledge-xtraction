@@ -242,7 +242,7 @@ def gemini_chat_completion(
     """
     Generates a response using the Gemini API, supporting system prompts and chat history.
     """
-    
+    import ipdb; ipdb.set_trace()
     # Initialize client, using best practice of reading API key from environment 
     # if it's not explicitly passed, or using the placeholder value.
     try:
