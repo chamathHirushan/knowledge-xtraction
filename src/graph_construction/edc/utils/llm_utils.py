@@ -187,7 +187,7 @@ def gemini_chat_completion(
     system_prompt: str = None,
     history: list = None,
     temperature: float = 0.7,
-    max_tokens: int = 2048,
+    max_tokens: int = 10000,
     max_retries: int = 5,
 ) -> str:
     
